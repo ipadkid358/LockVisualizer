@@ -10,9 +10,20 @@
 static DPMainEqualizerView *equalizerView;
 
 static void ReceivedRelayedNotification(CFMachPortRef port, LMMessage *request, CFIndex size, void *info) {
+    if ((size_t)size < sizeof(LMMessage)) {
+        // some kind of bad message
+        return;
+    }
+    
     if (equalizerView) {
+        float *buffer = LMMessageGetData(request);
+        if (sizeof(buffer[0]) != sizeof(float)) {
+            // somehow these were not floats
+            return;
+        }
+        
         dispatch_async(dispatch_get_main_queue(), ^{
-            [equalizerView updateBuffer:LMMessageGetData(request) withBufferSize:kSharedMusicInfoBufferSize];
+            [equalizerView updateBuffer:buffer withBufferSize:kSharedMusicInfoBufferSize];
         });
     }
 }
@@ -22,21 +33,23 @@ static void ReceivedRelayedNotification(CFMachPortRef port, LMMessage *request, 
 - (void)viewDidLoad {
     %orig;
     
-    dispatch_async(dispatch_get_main_queue(), ^{
-        if (!equalizerView) {
-            UIView *thisView = self.view;
-            DPEqualizerSettings *settings = [DPEqualizerSettings createByType:DPWave];
-            equalizerView = [[DPWaveEqualizerView alloc] initWithFrame:thisView.bounds andSettings:settings];
-            equalizerView.backgroundColor = UIColor.clearColor;
-            [thisView addSubview:equalizerView];
-        }
-    });
+    if (!equalizerView) {
+        UIView *thisView = self.view;
+        
+        CGRect origBounds = thisView.bounds;
+        double offset = 80;
+        origBounds.origin.y = origBounds.origin.y + offset;
+        origBounds.size.height = origBounds.size.height - offset;
+        
+        DPEqualizerSettings *settings = [DPEqualizerSettings createByType:DPWave];
+        equalizerView = [[DPWaveEqualizerView alloc] initWithFrame:origBounds andSettings:settings];
+        equalizerView.backgroundColor = UIColor.clearColor;
+        [thisView addSubview:equalizerView];
+    }
 }
 
 %end
 
 %ctor {
-    dispatch_async(dispatch_get_main_queue(), ^{
-        LMStartService(springboardService.serverName, CFRunLoopGetCurrent(), (CFMachPortCallBack)ReceivedRelayedNotification);
-    });
+    LMStartService(springboardService.serverName, CFRunLoopGetCurrent(), (CFMachPortCallBack)ReceivedRelayedNotification);
 }
