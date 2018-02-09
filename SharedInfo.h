@@ -2,7 +2,7 @@
 
 #define kSharedMusicInfoBufferSize 1024
 
-static LMConnection springboardService = {
+static LMConnection interprocSpringMedia = {
     MACH_PORT_NULL,
     "com.ipadkid.lockvisualizer.messaging"
 };

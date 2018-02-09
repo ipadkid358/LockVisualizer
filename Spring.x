@@ -11,6 +11,7 @@
 @end
 
 static DPMainEqualizerView *equalizerView;
+static BOOL isShowingMusic;
 
 static void relayedMessageCallBack(CFMachPortRef port, LMMessage *request, CFIndex size, void *info) {
     if ((size_t)size < sizeof(LMMessage)) {
@@ -51,6 +52,18 @@ static void updateVolumeGain() {
 
 %hook SBDashBoardMediaArtworkViewController
 
+- (void)viewWillAppear:(BOOL)animated {
+    %orig;
+    
+    isShowingMusic = YES;
+}
+
+- (void)viewDidDisappear:(BOOL)animated {
+    %orig;
+    
+    isShowingMusic = NO;
+}
+
 - (void)viewDidLoad {
     %orig;
     
@@ -77,7 +90,7 @@ static void updateVolumeGain() {
 %hook SBDashBoardNotificationListViewController
 
 - (BOOL)hasContent {
-    return NO;
+    return isShowingMusic ? NO : %orig;
 }
 
 %end
@@ -86,11 +99,11 @@ static void updateVolumeGain() {
 %hook SBDashBoardIdleTimerEventPublisher
 
 - (BOOL)isEnabled {
-    return NO;
+    return isShowingMusic ? NO : %orig;
 }
 
 %end
 
 %ctor {
-    LMStartService(springboardService.serverName, CFRunLoopGetCurrent(), (CFMachPortCallBack)relayedMessageCallBack);
+    LMStartService(interprocSpringMedia.serverName, CFRunLoopGetCurrent(), (CFMachPortCallBack)relayedMessageCallBack);
 }

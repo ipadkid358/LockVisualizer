@@ -9,10 +9,9 @@ LockVisualizerSpring_FILES = Spring.x $(wildcard Visualizers/*.m)
 LockVisualizerSpring_LIBRARIES = rocketbootstrap
 LockVisualizerSpring_CFLAGS = -fobjc-arc
 
-LockVisualizerMedia_FILES = Media.x
+LockVisualizerMedia_FILES = Media.c
 LockVisualizerMedia_FRAMEWORKS = AudioToolbox
 LockVisualizerMedia_LIBRARIES = rocketbootstrap
-LockVisualizerMedia_CFLAGS = -fobjc-arc
 
 include $(THEOS_MAKE_PATH)/tweak.mk
 
