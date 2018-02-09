@@ -12,26 +12,19 @@
 
 @interface DPMainEqualizerView : UIView
 
-- (instancetype)initWithFrame:(CGRect)frame andSettings : (DPEqualizerSettings*) settings;
+@property (strong, nonatomic) DPEqualizerSettings *equalizerSettings;
+@property (nonatomic, strong) UIColor *equalizerBackgroundColor;
+@property (nonatomic, strong) UIColor *lowFrequencyColor;
+@property (nonatomic, strong) UIColor *hightFrequencyColor;
+@property (nonatomic, strong) UIColor *equalizerBinColor;
+
+- (instancetype)initWithFrame:(CGRect)frame andSettings:(DPEqualizerSettings *)settings;
 
 - (void)updateBuffer:(float *)buffer withBufferSize:(UInt32)bufferSize;
+- (DPAudioService *)audioService;
+- (void)setupView;
+- (void)updateNumberOfBins:(int)numberOfBins;
+- (void)updateColors;
 
-- (DPAudioService*) audioService;
-
-- (void) setupView;
-
-- (void) updateNumberOfBins : (int) numberOfBins;
-
-- (void) updateColors;
-
-@property (strong, nonatomic) DPEqualizerSettings *equalizerSettings;
-
-@property (nonatomic, strong) UIColor *equalizerBackgroundColor;
-
-@property (nonatomic, strong) UIColor *lowFrequencyColor;
-
-@property (nonatomic, strong) UIColor *hightFrequencyColor;
-
-@property (nonatomic, strong) UIColor *equalizerBinColor;
 
 @end

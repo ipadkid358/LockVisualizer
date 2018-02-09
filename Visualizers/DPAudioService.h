@@ -10,7 +10,6 @@
 #import <UIKit/UIKit.h>
 #import <AVFoundation/AVFoundation.h>
 
-//Objects
 #import "DPEqualizerSettings.h"
 
 @protocol DPAudioServiceDelegate <NSObject>
@@ -23,24 +22,17 @@
 
 @interface DPAudioService : NSObject
 
-+ (instancetype) alloc __attribute__((unavailable("alloc not available, call manager instead")));
-- (instancetype) init __attribute__((unavailable("init not available, call manager instead")));
-+ (instancetype) new __attribute__((unavailable("new not available, call manager instead")));
++ (instancetype)alloc __attribute__((unavailable("alloc not available, call manager instead")));
+- (instancetype)init __attribute__((unavailable("init not available, call manager instead")));
++ (instancetype)new __attribute__((unavailable("new not available, call manager instead")));
 
 
 @property (nonatomic, weak) id<DPAudioServiceDelegate> delegate;
-
-@property (assign, nonatomic) DPPlotType plotType;
-
 @property (nonatomic) NSUInteger numOfBins;
 
-+ (instancetype) serviceWith : (DPEqualizerSettings*) audioSettings;
-
-- (float*) frequencyHeights;
-
-- (NSMutableArray*) timeHeights;
-
-- (void) updateBuffer: (float *)buffer
-       withBufferSize: (UInt32)bufferSize;
++ (instancetype)serviceWith:(DPEqualizerSettings *)audioSettings;
+- (float *)frequencyHeights;
+- (NSMutableArray *)timeHeights;
+- (void)setSampleData:(float *)data length:(int)length;
 
 @end

@@ -10,19 +10,19 @@
 
 @implementation UIImage (DPGradientImage)
 
-+ (UIImage*) convertGradientToImage: (NSArray*) colors frame : (CGRect) frame{
++ (UIImage *)convertGradientToImage:(NSArray *)colors frame:(CGRect)frame {
     CAGradientLayer *layer = [[CAGradientLayer alloc] init];
     layer.frame = frame;
     NSMutableArray *colorsRef = [[NSMutableArray alloc] init];
     NSMutableArray *locations = [[NSMutableArray alloc] init];
-    
-    for (int i = 0; i < colors.count; i++) {
+    NSUInteger colorCount = colors.count;
+    for (int i = 0; i < colorCount; i++) {
         UIColor *color = colors[i];
         
         [colorsRef addObject: (id) color.CGColor];
         
-        CGFloat location = (CGFloat)i / (CGFloat)(colors.count - 1);
-        NSNumber *locationNumber = [[NSNumber alloc] initWithFloat: location];
+        CGFloat location = (CGFloat)i / (CGFloat)(colorCount - 1);
+        NSNumber *locationNumber = [[NSNumber alloc] initWithFloat:location];
         
         [locations addObject: locationNumber];
     }
@@ -38,7 +38,6 @@
     
     // return the gradient image
     return gradientImage;
-    
 }
 
 @end

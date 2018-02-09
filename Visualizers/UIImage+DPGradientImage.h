@@ -10,6 +10,6 @@
 
 @interface UIImage (DPGradientImage)
 
-+ (UIImage*) convertGradientToImage: (NSArray*) colors frame : (CGRect) frame;
++ (UIImage *)convertGradientToImage:(NSArray *)colors frame:(CGRect)frame;
 
 @end

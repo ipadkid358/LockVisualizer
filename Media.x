@@ -6,6 +6,7 @@ static dispatch_queue_t messageQueue;
 %hookf(OSStatus, AudioUnitRender, AudioUnit inUnit, AudioUnitRenderActionFlags *ioActionFlags, const AudioTimeStamp *inTimeStamp, UInt32 inOutputBusNumber, UInt32 inNumberFrames, AudioBufferList *ioData) {
     OSStatus execNow = %orig;
     
+    // Use a special queue so the data is sent in order
     dispatch_async(messageQueue, ^{
         AudioBuffer realBuffer = ioData->mBuffers[0];
         float *buffData = realBuffer.mData;

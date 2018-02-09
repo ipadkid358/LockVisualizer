@@ -1,10 +1,13 @@
-#import "Visualizers/DPMainEqualizerView.h"
-#import "Visualizers/DPEqualizerSettings.h"
 #import "Visualizers/DPWaveEqualizerView.h"
 
 #import "SharedInfo.h"
 
 @interface SBDashBoardMediaArtworkViewController : UIViewController
+@end
+
+@interface VolumeControl : NSObject
++ (instancetype)sharedVolumeControl;
+- (float)getMediaVolume;
 @end
 
 static DPMainEqualizerView *equalizerView;
@@ -23,10 +26,28 @@ static void ReceivedRelayedNotification(CFMachPortRef port, LMMessage *request, 
         }
         
         dispatch_async(dispatch_get_main_queue(), ^{
+            // UI updates need to happen on the main thread
             [equalizerView updateBuffer:buffer withBufferSize:kSharedMusicInfoBufferSize];
         });
     }
 }
+
+static void updateVolumeGain() {
+    if (equalizerView) {
+        VolumeControl *volControl = [%c(VolumeControl) sharedVolumeControl];
+        equalizerView.equalizerSettings.gain = volControl.getMediaVolume*20;
+    }
+}
+
+%hook SBMediaController
+
+- (void)_systemVolumeChanged:(id)arg1 {
+    %orig;
+    
+    updateVolumeGain();
+}
+
+%end
 
 %hook SBDashBoardMediaArtworkViewController
 
@@ -37,15 +58,26 @@ static void ReceivedRelayedNotification(CFMachPortRef port, LMMessage *request, 
         UIView *thisView = self.view;
         
         CGRect origBounds = thisView.bounds;
-        double offset = 80;
+        CGFloat const offset = 80;
         origBounds.origin.y = origBounds.origin.y + offset;
         origBounds.size.height = origBounds.size.height - offset;
         
-        DPEqualizerSettings *settings = [DPEqualizerSettings createByType:DPWave];
+        DPEqualizerSettings *settings = [DPEqualizerSettings create];
         equalizerView = [[DPWaveEqualizerView alloc] initWithFrame:origBounds andSettings:settings];
         equalizerView.backgroundColor = UIColor.clearColor;
         [thisView addSubview:equalizerView];
+        
+        updateVolumeGain();
     }
+}
+
+%end
+
+// Disable sleeping on the lockscreen
+%hook SBDashBoardIdleTimerEventPublisher
+
+- (BOOL)isEnabled {
+    return NO;
 }
 
 %end

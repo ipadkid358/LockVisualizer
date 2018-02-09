@@ -19,13 +19,9 @@ const NSInteger kFramesPerSecond = 20; // Alter this to draw more or less often
 
 @interface DPAudioService () {
     FFTSetup fftSetup;
-    
     COMPLEX_SPLIT complexSplit;
-    
     int log2n, n, nOver2;
-    
     float sampleRate;
-    
     size_t bufferCapacity, index;
     
     // buffers
@@ -33,9 +29,7 @@ const NSInteger kFramesPerSecond = 20; // Alter this to draw more or less often
 }
 
 @property (strong, nonatomic) CADisplayLink *displaylink;
-
 @property (strong, nonatomic) DPEqualizerSettings *settings;
-
 @property (strong, nonatomic) NSMutableArray *heightsByTime;
 
 @end
@@ -43,23 +37,18 @@ const NSInteger kFramesPerSecond = 20; // Alter this to draw more or less often
 @implementation DPAudioService
 
 @synthesize numOfBins;
-@synthesize plotType = _plotType;
 
-+ (instancetype) serviceWith : (DPEqualizerSettings*) audioSettings
-{
-    DPAudioService *sharedService= [[super alloc] initUniqueInstanceWith: audioSettings];
-    return sharedService;
++ (instancetype)serviceWith:(DPEqualizerSettings *)audioSettings {
+    return [[super alloc] initUniqueInstanceWith:audioSettings];
 }
 
-- (instancetype) initUniqueInstanceWith : (DPEqualizerSettings*) audioSettings
-{
-    if (self = [super init])
-    {
+- (instancetype)initUniqueInstanceWith:(DPEqualizerSettings *)audioSettings {
+    if (self = [super init]) {
         self.settings = audioSettings;
         [self setNumOfBins: audioSettings.numOfBins];
-        self.plotType = audioSettings.plotType;
         [self setup];
     }
+    
     return self;
 }
 
@@ -96,7 +85,7 @@ const NSInteger kFramesPerSecond = 20; // Alter this to draw more or less often
     return heightsByFrequency;
 }
 
-- (NSMutableArray *) timeHeights {
+- (NSMutableArray *)timeHeights {
     return self.heightsByTime;
 }
 
@@ -221,11 +210,6 @@ const NSInteger kFramesPerSecond = 20; // Alter this to draw more or less often
     }
 }
 
-- (void)updateBuffer:(float *)buffer withBufferSize:(UInt32)bufferSize {
-    [self setSampleData:buffer length:bufferSize];
-}
-
-
 - (void)freeBuffersIfNeeded {
     if (heightsByFrequency) {
         free(heightsByFrequency);
@@ -247,7 +231,7 @@ const NSInteger kFramesPerSecond = 20; // Alter this to draw more or less often
     }
 }
 
-- (void) p_refreshEqualizerDisplay {
+- (void)p_refreshEqualizerDisplay {
     if ([self.delegate respondsToSelector:@selector(refreshEqualizerDisplay)]) {
         [self.delegate refreshEqualizerDisplay];
     }

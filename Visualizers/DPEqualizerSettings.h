@@ -8,18 +8,12 @@
 
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
-#import "DPConstants.h"
 
 @interface DPEqualizerSettings : NSObject
 
 /// Creates a new default instance of the DPEqualizerSettings.
 /// @return The newly created DPEqualizerSettings instance.
-+ (instancetype) create;
-
-/// Creates a new instance of the DPEqualizerSettings using a DPEqualizerType.
-/// @param type The type of equalizer that can be displayed in the view.
-/// @return The newly created DPEqualizerSettings instance.
-+ (instancetype) createByType : (DPEqualizerType) type;
++ (instancetype)create;
 
 /// The highest bound of the frequency. Default: 7000Hz
 @property (nonatomic) float maxFrequency;
@@ -42,12 +36,6 @@
 
 /// The number of max bin height. Default: Screen height.
 @property (assign, nonatomic) CGFloat maxBinHeight;
-
-/// The type of plot that can be displayed in the view using the data. Default: DPPlotTypeBuffer.
-@property (assign, nonatomic) DPPlotType plotType;
-
-/// The type of equalizer that can be displayed in the view using the data. Default: DPHistogram.
-@property (assign, nonatomic) DPEqualizerType equalizerType;
 
 /// The colors of equalizer background that can be displayed in the view.
 @property (nonatomic, strong) NSMutableArray *equalizerBackgroundColors;

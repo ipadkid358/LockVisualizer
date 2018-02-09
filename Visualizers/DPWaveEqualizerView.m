@@ -9,33 +9,31 @@
 #import "DPWaveEqualizerView.h"
 
 @interface DPWaveEqualizerView () {
-        float dx;
-        float dy;
-        int setZero;
+    float dx;
+    float dy;
+    int setZero;
 }
-
-@property (nonatomic, assign, readonly) int granularity;
 
 @end
 
 @implementation DPWaveEqualizerView
 
-- (void) setupView {
+- (void)setupView {
     dy = 100;
     dx = self.equalizerSettings.numOfBins;
     setZero = 2;
     self.backgroundColor = self.equalizerBackgroundColor;
 }
 
-- (int) granularity {
+- (int)granularity {
     return MIN(10, 200 - (int) (self.equalizerSettings.numOfBins/3) * 2);
 }
 
-- (NSArray*)arrayOfPointsForBinRange : (NSRange) range {
+- (NSArray *)arrayOfPointsForBinRange:(NSRange)range {
     
     NSMutableArray *points = [NSMutableArray array];
     
-    float viewWidth = CGRectGetWidth(self.frame) + (self.equalizerSettings.plotType == DPPlotTypeRolling ? 60 : 0);
+    float viewWidth = CGRectGetWidth(self.frame);
     float viewHeight = CGRectGetHeight(self.frame);
     for (NSInteger i = 0; i < range.length; i++) {
         
@@ -54,14 +52,12 @@
     }
     
     return points;
-
+    
 }
 
-- (CGFloat) columnHeightAtIndex : (NSInteger) index {
-    CGFloat columnHeight = self.equalizerSettings.plotType == DPPlotTypeRolling ? [[self.audioService timeHeights][index] floatValue] : [self.audioService frequencyHeights][index];
-            columnHeight = MAX(1, columnHeight);
-            columnHeight = MIN(CGRectGetHeight(self.frame), columnHeight / 7);
-    return columnHeight;
+- (CGFloat)columnHeightAtIndex:(NSInteger)index {
+    CGFloat columnHeight = MAX(1, self.audioService.frequencyHeights[index]);
+    return MIN(CGRectGetHeight(self.frame), columnHeight / 7);
 }
 
 - (void)drawRect:(CGRect)rect {
@@ -71,60 +67,35 @@
     [(UIColor *)self.backgroundColor set];
     UIRectFill(rect);
     
-    CGPoint leftBottom = CGPointMake(0, CGRectGetHeight(rect));
-    CGPoint rightBottom = CGPointMake(CGRectGetWidth(rect), CGRectGetHeight(rect));
-    
     NSMutableArray *points = [[self arrayOfPointsForBinRange: NSMakeRange(0, self.equalizerSettings.numOfBins / 2)] mutableCopy];
     NSMutableArray *points2 = [[self arrayOfPointsForBinRange: NSMakeRange(self.equalizerSettings.numOfBins / 2, self.equalizerSettings.numOfBins / 2)] mutableCopy];
     
     // Add control points to make the math make sense
     UIBezierPath *lowFrequencyLineGraph = [self addBezierPathBetweenPoints: points toView: self];
     UIBezierPath *hightFrequencyLineGraph = [self addBezierPathBetweenPoints: points2 toView: self];
-
     
-    if (self.equalizerSettings.fillGraph) {
-        
-        [self.lowFrequencyColor setFill];
-        [self.lowFrequencyColor setStroke];
-
-        [lowFrequencyLineGraph addLineToPoint:CGPointMake(leftBottom.x, leftBottom.y)];
-        [lowFrequencyLineGraph addLineToPoint:CGPointMake(rightBottom.x, rightBottom.y)];
-        [lowFrequencyLineGraph closePath];
-        [lowFrequencyLineGraph fill]; // fill color (if closed)
-        
-        [self.hightFrequencyColor setFill];
-        [self.hightFrequencyColor setStroke];
-
-        [hightFrequencyLineGraph addLineToPoint:CGPointMake(leftBottom.x, leftBottom.y)];
-        [hightFrequencyLineGraph addLineToPoint:CGPointMake(rightBottom.x, rightBottom.y)];
-        [hightFrequencyLineGraph closePath];
-        [hightFrequencyLineGraph fill]; // fill color (if closed)
-        
-    } else {
-        
-        [self.lowFrequencyColor setStroke];
-
-        lowFrequencyLineGraph.lineCapStyle = kCGLineCapRound;
-        lowFrequencyLineGraph.lineJoinStyle = kCGLineJoinRound;
-        lowFrequencyLineGraph.lineWidth = 0.5; // line width
-        [lowFrequencyLineGraph stroke];
-        
-        [self.hightFrequencyColor setStroke];
-
-        hightFrequencyLineGraph.lineCapStyle = kCGLineCapRound;
-        hightFrequencyLineGraph.lineJoinStyle = kCGLineJoinRound;
-                hightFrequencyLineGraph.lineWidth = 0.5; // line width
-        [hightFrequencyLineGraph stroke];
-    }
+    
+    
+    [self.lowFrequencyColor setStroke];
+    
+    lowFrequencyLineGraph.lineCapStyle = kCGLineCapRound;
+    lowFrequencyLineGraph.lineJoinStyle = kCGLineJoinRound;
+    lowFrequencyLineGraph.lineWidth = 0.5; // line width
+    [lowFrequencyLineGraph stroke];
+    
+    [self.hightFrequencyColor setStroke];
+    
+    hightFrequencyLineGraph.lineCapStyle = kCGLineCapRound;
+    hightFrequencyLineGraph.lineJoinStyle = kCGLineJoinRound;
+    hightFrequencyLineGraph.lineWidth = 0.5; // line width
+    [hightFrequencyLineGraph stroke];
     CGContextRestoreGState(ctx);
 }
 
 
-- (UIBezierPath*)addBezierPathBetweenPoints:(NSMutableArray *)points
-                                     toView:(UIView *)view
-{
+- (UIBezierPath*)addBezierPathBetweenPoints:(NSMutableArray *)points toView:(UIView *)view {
     UIBezierPath *path = [UIBezierPath bezierPath];
-
+    
     [points insertObject:points[0] atIndex:0];
     [points addObject:[points lastObject]];
     
@@ -145,8 +116,7 @@
             pi.y = 0.5 * (2*point1.y+(point2.y-point0.y)*t + (2*point0.y-5*point1.y+4*point2.y-point3.y)*tt + (3*point1.y-point0.y-3*point2.y+point3.y)*ttt);
             if (pi.y > CGRectGetHeight(view.frame)) {
                 pi.y = CGRectGetWidth(view.frame);
-            }
-            else if (pi.y < 0){
+            } else if (pi.y < 0){
                 pi.y = 0;
             }
             [path addLineToPoint:pi];
