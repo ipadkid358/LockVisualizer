@@ -13,8 +13,6 @@ const UInt32 kMaxFrames = 2048;
 
 const Float32 kAdjust0DB = 1.5849e-13;
 
-const NSInteger kFrameInterval = 1; // Alter this to draw more or less often
-
 const NSInteger kFramesPerSecond = 20; // Alter this to draw more or less often
 
 @interface DPAudioService () {
@@ -45,7 +43,7 @@ const NSInteger kFramesPerSecond = 20; // Alter this to draw more or less often
 - (instancetype)initUniqueInstanceWith:(DPEqualizerSettings *)audioSettings {
     if (self = [super init]) {
         self.settings = audioSettings;
-        [self setNumOfBins: audioSettings.numOfBins];
+        [self setNumOfBins:audioSettings.numOfBins];
         [self setup];
     }
     
@@ -202,7 +200,7 @@ const NSInteger kFramesPerSecond = 20; // Alter this to draw more or less often
             }
         }
         
-        [self.heightsByTime addObject: [NSNumber numberWithFloat:maxHeight]];
+        [self.heightsByTime addObject:[NSNumber numberWithFloat:maxHeight]];
         
         if (self.heightsByTime.count > numOfBins) {
             [self.heightsByTime removeObjectAtIndex:0];

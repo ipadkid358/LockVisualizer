@@ -17,6 +17,5 @@ LockVisualizerMedia_CFLAGS = -fobjc-arc
 include $(THEOS_MAKE_PATH)/tweak.mk
 
 after-install::
+# Changes are rarely made to mediaserverd, kill by hand
 	install.exec "killall -9 SpringBoard" 
-
-# mediaserverd"

@@ -49,6 +49,4 @@
 /// The colors of bins that can be displayed in the view.
 @property (nonatomic, strong) NSMutableArray *equalizerBinColors;
 
-@property (nonatomic, assign) BOOL fillGraph;
-
 @end

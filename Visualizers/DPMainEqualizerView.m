@@ -8,8 +8,6 @@
 
 #import "DPMainEqualizerView.h"
 
-#import "UIImage+DPGradientImage.h"
-
 @interface DPMainEqualizerView () <DPAudioServiceDelegate>
 
 @property (strong, nonatomic) DPAudioService *audioService;
@@ -21,7 +19,7 @@
 - (instancetype)initWithFrame:(CGRect)frame andSettings:(DPEqualizerSettings *)settings {
     if (self = [super initWithFrame:frame]) {
         self.frame = frame;
-        self.equalizerSettings = settings;
+        _equalizerSettings = settings;
         [self setupView];
     }
     return self;
@@ -68,30 +66,62 @@
     return _equalizerSettings;
 }
 
+- (UIColor *)convertGradientToImage:(NSArray *)colors {
+    NSUInteger colorCount = colors.count;
+    NSMutableArray *colorsRef = [NSMutableArray arrayWithCapacity:colorCount];
+    NSMutableArray *locations = [NSMutableArray arrayWithCapacity:colorCount];
+    
+    CGFloat index = 0;
+    CGFloat increment = 1.0/(colorCount - 1);
+    for (UIColor *color in colors) {
+        [colorsRef addObject:(id)color.CGColor];
+        [locations addObject:[NSNumber numberWithFloat:index]];
+        index += increment;
+    }
+    
+    CAGradientLayer *layer = [CAGradientLayer new];
+    layer.frame = self.bounds;
+    layer.colors = colorsRef;
+    layer.locations = locations;
+    
+    UIGraphicsBeginImageContext(layer.bounds.size);
+    [layer renderInContext:UIGraphicsGetCurrentContext()];
+    UIImage *gradientImage = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    
+    // return the gradient image
+    return [UIColor colorWithPatternImage:gradientImage];
+}
+
+
 - (UIColor *)equalizerBackgroundColor {
     if (!_equalizerBackgroundColor) {
-        _equalizerBackgroundColor = (self.equalizerSettings.equalizerBackgroundColors.count > 1) ? [UIColor colorWithPatternImage: [UIImage convertGradientToImage: self.equalizerSettings.equalizerBackgroundColors frame: self.bounds]] : [self.equalizerSettings.equalizerBackgroundColors firstObject];
+        NSArray<UIColor *> *theColors = _equalizerSettings.equalizerBackgroundColors;
+        _equalizerBackgroundColor = (theColors.count > 1) ? [self convertGradientToImage:theColors] : theColors.firstObject;
     }
     return _equalizerBackgroundColor;
 }
 
 - (UIColor *)lowFrequencyColor {
     if (!_lowFrequencyColor) {
-        _lowFrequencyColor = (self.equalizerSettings.lowFrequencyColors.count > 1) ? [UIColor colorWithPatternImage:[UIImage convertGradientToImage: self.equalizerSettings.lowFrequencyColors frame: self.bounds]] : [self.equalizerSettings.lowFrequencyColors firstObject];
+        NSArray<UIColor *> *theColors = _equalizerSettings.lowFrequencyColors;
+        _lowFrequencyColor = (theColors.count > 1) ? [self convertGradientToImage:theColors] : theColors.firstObject;
     }
     return _lowFrequencyColor;
 }
 
 - (UIColor *)hightFrequencyColor {
     if (!_hightFrequencyColor) {
-        _hightFrequencyColor = (self.equalizerSettings.hightFrequencyColors.count > 1) ? [UIColor colorWithPatternImage:[UIImage convertGradientToImage: self.equalizerSettings.hightFrequencyColors frame: self.bounds]] : [self.equalizerSettings.hightFrequencyColors firstObject];
+        NSArray<UIColor *> *theColors = _equalizerSettings.hightFrequencyColors;
+        _hightFrequencyColor = (theColors.count > 1) ? [self convertGradientToImage:theColors] : theColors.firstObject;
     }
     return _hightFrequencyColor;
 }
 
 - (UIColor *)equalizerBinColor {
     if (!_equalizerBinColor) {
-        _equalizerBinColor = (self.equalizerSettings.equalizerBinColors.count > 1) ? [UIColor colorWithPatternImage:[UIImage convertGradientToImage: self.equalizerSettings.equalizerBinColors frame: self.bounds]] : [self.equalizerSettings.equalizerBinColors firstObject];
+        NSArray<UIColor *> *theColors = _equalizerSettings.equalizerBinColors;
+        _equalizerBinColor = (theColors.count > 1) ? [self convertGradientToImage:theColors] : theColors.firstObject;
     }
     return _equalizerBinColor;
 }

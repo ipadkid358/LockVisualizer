@@ -30,16 +30,13 @@
 }
 
 - (NSArray *)arrayOfPointsForBinRange:(NSRange)range {
-    
     NSMutableArray *points = [NSMutableArray array];
     
     float viewWidth = CGRectGetWidth(self.frame);
     float viewHeight = CGRectGetHeight(self.frame);
     for (NSInteger i = 0; i < range.length; i++) {
-        
-        float point1x = viewWidth - (viewWidth / range.length) * i; // start graph x on the right hand side
-        float point1y = (viewHeight - (viewHeight / dy) * [self columnHeightAtIndex: range.length + range.location- i - 1]) / setZero; //start graph y on the bottom
-        
+        float point1x = viewWidth - (viewWidth / range.length) * i;
+        float point1y = (viewHeight - (viewHeight / dy) * [self columnHeightAtIndex: range.length + range.location- i - 1]) / setZero;
         float point2x = viewWidth - (viewWidth / range.length) * i - (viewWidth / range.length);
         float point2y = point1y;
         
@@ -48,11 +45,10 @@
         }
         
         CGPoint p = (i == 0) ? CGPointMake(point1x, point1y) : CGPointMake(point2x, point2y);
-        [points addObject: [NSValue valueWithCGPoint:p ]];
+        [points addObject:[NSValue valueWithCGPoint:p]];
     }
     
     return points;
-    
 }
 
 - (CGFloat)columnHeightAtIndex:(NSInteger)index {
@@ -71,10 +67,8 @@
     NSMutableArray *points2 = [[self arrayOfPointsForBinRange: NSMakeRange(self.equalizerSettings.numOfBins / 2, self.equalizerSettings.numOfBins / 2)] mutableCopy];
     
     // Add control points to make the math make sense
-    UIBezierPath *lowFrequencyLineGraph = [self addBezierPathBetweenPoints: points toView: self];
-    UIBezierPath *hightFrequencyLineGraph = [self addBezierPathBetweenPoints: points2 toView: self];
-    
-    
+    UIBezierPath *lowFrequencyLineGraph = [self addBezierPathBetweenPoints:points toView:self];
+    UIBezierPath *hightFrequencyLineGraph = [self addBezierPathBetweenPoints:points2 toView:self];
     
     [self.lowFrequencyColor setStroke];
     
@@ -93,19 +87,19 @@
 }
 
 
-- (UIBezierPath*)addBezierPathBetweenPoints:(NSMutableArray *)points toView:(UIView *)view {
+- (UIBezierPath*)addBezierPathBetweenPoints:(NSMutableArray<NSValue *> *)points toView:(UIView *)view {
     UIBezierPath *path = [UIBezierPath bezierPath];
     
     [points insertObject:points[0] atIndex:0];
-    [points addObject:[points lastObject]];
+    [points addObject:points.lastObject];
     
-    [path moveToPoint:[[points firstObject] CGPointValue]];
+    [path moveToPoint:points.firstObject.CGPointValue];
     
     for (int index = 1; index < points.count - 2 ; index++) {
-        CGPoint point0 = [[points objectAtIndex:index - 1] CGPointValue];
-        CGPoint point1 = [[points objectAtIndex:index] CGPointValue];
-        CGPoint point2 = [[points objectAtIndex:index + 1] CGPointValue];
-        CGPoint point3 = [[points objectAtIndex:index + 2] CGPointValue];
+        CGPoint point0 = [points[index - 1] CGPointValue];
+        CGPoint point1 = [points[index] CGPointValue];
+        CGPoint point2 = [points[index + 1] CGPointValue];
+        CGPoint point3 = [points[index + 2] CGPointValue];
         
         for (int i = 1; i < self.granularity ; i++) {
             float t = (float) i * (1.0f / (float) self.granularity);
@@ -121,9 +115,9 @@
             }
             [path addLineToPoint:pi];
         }
-        [path addLineToPoint : point2];
+        [path addLineToPoint:point2];
     }
-    [path addLineToPoint:[[points objectAtIndex:[points count] - 1] CGPointValue]];
+    [path addLineToPoint:points.lastObject.CGPointValue];
     return path;
 }
 

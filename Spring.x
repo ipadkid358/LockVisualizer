@@ -12,7 +12,7 @@
 
 static DPMainEqualizerView *equalizerView;
 
-static void ReceivedRelayedNotification(CFMachPortRef port, LMMessage *request, CFIndex size, void *info) {
+static void relayedMessageCallBack(CFMachPortRef port, LMMessage *request, CFIndex size, void *info) {
     if ((size_t)size < sizeof(LMMessage)) {
         // some kind of bad message
         return;
@@ -73,6 +73,15 @@ static void updateVolumeGain() {
 
 %end
 
+// Disable showing notifications on the lockscreen
+%hook SBDashBoardNotificationListViewController
+
+- (BOOL)hasContent {
+    return NO;
+}
+
+%end
+
 // Disable sleeping on the lockscreen
 %hook SBDashBoardIdleTimerEventPublisher
 
@@ -83,5 +92,5 @@ static void updateVolumeGain() {
 %end
 
 %ctor {
-    LMStartService(springboardService.serverName, CFRunLoopGetCurrent(), (CFMachPortCallBack)ReceivedRelayedNotification);
+    LMStartService(springboardService.serverName, CFRunLoopGetCurrent(), (CFMachPortCallBack)relayedMessageCallBack);
 }
