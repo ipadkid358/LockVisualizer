@@ -20,7 +20,7 @@ static OSStatus patchedAudioUnitRender(AudioUnit inUnit, AudioUnitRenderActionFl
     return execNow;
 }
 
-static __attribute__((constructor)) void _logosLocalInit() {
+static __attribute__((constructor)) void audioUnitRenderMediaHook() {
     messageQueue = dispatch_queue_create("com.ipadkid.lockvisualizer.mediaqueue", NULL);
-    MSHookFunction(AudioUnitRender, (void *)&patchedAudioUnitRender, (void **)&originalAudioUnitRender);
+    MSHookFunction(AudioUnitRender, &patchedAudioUnitRender, (void **)&originalAudioUnitRender);
 }

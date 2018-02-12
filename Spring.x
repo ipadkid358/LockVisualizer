@@ -5,12 +5,17 @@
 @interface SBDashBoardMediaArtworkViewController : UIViewController
 @end
 
+@interface SBLockScreenNowPlayingController : NSObject
+@property (assign, getter=isEnabled, nonatomic) BOOL enabled;
+@end
+
 @interface VolumeControl : NSObject
 + (instancetype)sharedVolumeControl;
 - (float)getMediaVolume;
 @end
 
 static DPMainEqualizerView *equalizerView;
+static SBLockScreenNowPlayingController *sblsNowPlayingController;
 static BOOL isShowingMusic;
 
 static void relayedMessageCallBack(CFMachPortRef port, LMMessage *request, CFIndex size, void *info) {
@@ -68,6 +73,8 @@ static void updateVolumeGain() {
     %orig;
     
     if (!equalizerView) {
+        LMStartService(interprocSpringMedia.serverName, CFRunLoopGetCurrent(), (CFMachPortCallBack)relayedMessageCallBack);
+        
         UIView *thisView = self.view;
         
         CGRect origBounds = thisView.bounds;
@@ -86,11 +93,26 @@ static void updateVolumeGain() {
 
 %end
 
-// Disable showing notifications on the lockscreen
+%hook SBLockScreenNowPlayingController
+
+- (id)initWithMediaController:(id)mediaController {
+    sblsNowPlayingController = %orig;
+    
+    return sblsNowPlayingController;
+}
+
+%end
+
+
+// Properly hide media if a notification is presenting
 %hook SBDashBoardNotificationListViewController
 
 - (BOOL)hasContent {
-    return isShowingMusic ? NO : %orig;
+    BOOL ret = %orig;
+    
+    sblsNowPlayingController.enabled = !ret;
+    
+    return ret;
 }
 
 %end
@@ -103,7 +125,3 @@ static void updateVolumeGain() {
 }
 
 %end
-
-%ctor {
-    LMStartService(interprocSpringMedia.serverName, CFRunLoopGetCurrent(), (CFMachPortCallBack)relayedMessageCallBack);
-}
