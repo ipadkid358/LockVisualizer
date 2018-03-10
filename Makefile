@@ -1,5 +1,5 @@
 ARCHS = arm64
-TARGET = iphone:clang:11.2:11.2
+TARGET = iphone:clang:10.2:10.2
 
 include $(THEOS)/makefiles/common.mk
 
@@ -16,5 +16,4 @@ LockVisualizerMedia_LIBRARIES = rocketbootstrap
 include $(THEOS_MAKE_PATH)/tweak.mk
 
 after-install::
-# Changes are rarely made to mediaserverd, kill by hand
-	install.exec "killall -9 SpringBoard" 
+	install.exec "killall -9 mediaserverd backboardd"

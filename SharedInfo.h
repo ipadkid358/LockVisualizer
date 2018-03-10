@@ -1,6 +1,7 @@
 #import <LightMessaging/LightMessaging.h>
 
-#define kSharedMusicInfoBufferSize 1024
+#define kHiddenNotifName "com.ipadkid.lockvisualizer/hidden"
+#define kShowingNotifName "com.ipadkid.lockvisualizer/showing"
 
 static LMConnection interprocSpringMedia = {
     MACH_PORT_NULL,

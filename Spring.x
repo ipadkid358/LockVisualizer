@@ -1,4 +1,5 @@
 #import "Visualizers/DPWaveEqualizerView.h"
+#import <notify.h>
 
 #import "SharedInfo.h"
 
@@ -19,21 +20,18 @@ static SBLockScreenNowPlayingController *sblsNowPlayingController;
 static BOOL isShowingMusic;
 
 static void relayedMessageCallBack(CFMachPortRef port, LMMessage *request, CFIndex size, void *info) {
-    if ((size_t)size < sizeof(LMMessage)) {
-        // some kind of bad message
-        return;
-    }
-    
     if (equalizerView) {
-        float *buffer = LMMessageGetData(request);
-        if (sizeof(buffer[0]) != sizeof(float)) {
-            // somehow these were not floats
+        if ((size_t)size < sizeof(LMMessage)) {
+            // some kind of bad message
             return;
         }
         
+        float *buffer = LMMessageGetData(request);
+        unsigned int bufferSize = LMMessageGetDataLength(request)/sizeof(float);
+        
         dispatch_async(dispatch_get_main_queue(), ^{
             // UI updates need to happen on the main thread
-            [equalizerView updateBuffer:buffer withBufferSize:kSharedMusicInfoBufferSize];
+            [equalizerView updateBuffer:buffer withBufferSize:bufferSize];
         });
     }
 }
@@ -61,31 +59,25 @@ static void updateVolumeGain() {
     %orig;
     
     isShowingMusic = YES;
+    notify_post(kShowingNotifName);
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
     %orig;
     
     isShowingMusic = NO;
+    notify_post(kHiddenNotifName);
 }
 
 - (void)viewDidLoad {
     %orig;
     
     if (!equalizerView) {
-        LMStartService(interprocSpringMedia.serverName, CFRunLoopGetCurrent(), (CFMachPortCallBack)relayedMessageCallBack);
-        
-        UIView *thisView = self.view;
-        
-        CGRect origBounds = thisView.bounds;
-        CGFloat const offset = 80;
-        origBounds.origin.y = origBounds.origin.y + offset;
-        origBounds.size.height = origBounds.size.height - offset;
-        
         DPEqualizerSettings *settings = [DPEqualizerSettings create];
-        equalizerView = [[DPWaveEqualizerView alloc] initWithFrame:origBounds andSettings:settings];
+        // Hardcoded Plus sized location
+        equalizerView = [[DPWaveEqualizerView alloc] initWithFrame:CGRectMake(0, 80, 414, 656) andSettings:settings];
         equalizerView.backgroundColor = UIColor.clearColor;
-        [thisView addSubview:equalizerView];
+        [self.view addSubview:equalizerView];
         
         updateVolumeGain();
     }
@@ -93,16 +85,16 @@ static void updateVolumeGain() {
 
 %end
 
+// Get and store mediaController instance
 %hook SBLockScreenNowPlayingController
 
-- (id)initWithMediaController:(id)mediaController {
+- (SBLockScreenNowPlayingController *)initWithMediaController:(id)mediaController {
     sblsNowPlayingController = %orig;
     
     return sblsNowPlayingController;
 }
 
 %end
-
 
 // Properly hide media if a notification is presenting
 %hook SBDashBoardNotificationListViewController
@@ -125,3 +117,7 @@ static void updateVolumeGain() {
 }
 
 %end
+
+%ctor {
+    LMStartService(interprocSpringMedia.serverName, CFRunLoopGetCurrent(), (CFMachPortCallBack)relayedMessageCallBack);
+}
