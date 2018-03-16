@@ -1,5 +1,4 @@
 #import "Visualizers/DPWaveEqualizerView.h"
-#import <notify.h>
 
 #import "SharedInfo.h"
 
@@ -59,14 +58,12 @@ static void updateVolumeGain() {
     %orig;
     
     isShowingMusic = YES;
-    notify_post(kShowingNotifName);
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
     %orig;
     
     isShowingMusic = NO;
-    notify_post(kHiddenNotifName);
 }
 
 - (void)viewDidLoad {
