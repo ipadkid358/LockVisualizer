@@ -38,10 +38,12 @@ static void relayedMessageCallBack(CFMachPortRef port, LMMessage *request, CFInd
 static void updateVolumeGain() {
     if (equalizerView) {
         VolumeControl *volControl = [%c(VolumeControl) sharedVolumeControl];
+        // I've been told by music lovers that gain is not volume, however it looks cool
         equalizerView.equalizerSettings.gain = volControl.getMediaVolume*20;
     }
 }
 
+// Update visualizer's gain with any volume change
 %hook SBMediaController
 
 - (void)_systemVolumeChanged:(id)arg1 {
@@ -52,18 +54,21 @@ static void updateVolumeGain() {
 
 %end
 
+
 %hook SBDashBoardMediaArtworkViewController
 
 - (void)viewWillAppear:(BOOL)animated {
     %orig;
     
     isShowingMusic = YES;
+    notify_post(kShowingNotifName);
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
     %orig;
     
     isShowingMusic = NO;
+    notify_post(kHiddenNotifName);
 }
 
 - (void)viewDidLoad {
@@ -86,9 +91,7 @@ static void updateVolumeGain() {
 %hook SBLockScreenNowPlayingController
 
 - (SBLockScreenNowPlayingController *)initWithMediaController:(id)mediaController {
-    sblsNowPlayingController = %orig;
-    
-    return sblsNowPlayingController;
+    return sblsNowPlayingController = %orig;
 }
 
 %end
@@ -115,6 +118,7 @@ static void updateVolumeGain() {
 
 %end
 
+// Listen for messages from mediaserverd
 %ctor {
     LMStartService(interprocSpringMedia.serverName, CFRunLoopGetCurrent(), (CFMachPortCallBack)relayedMessageCallBack);
 }
