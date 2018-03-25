@@ -9,6 +9,6 @@
 #import <UIKit/UIKit.h>
 #import "DPMainEqualizerView.h"
 
+/// Wave implementation of an equalizer view
 @interface DPWaveEqualizerView : DPMainEqualizerView
-
 @end

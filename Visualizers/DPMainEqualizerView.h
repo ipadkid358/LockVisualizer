@@ -10,9 +10,11 @@
 #import "DPEqualizerSettings.h"
 #import "DPAudioService.h"
 
-@interface DPMainEqualizerView : UIView
+@interface DPMainEqualizerView : UIView <DPAudioServiceDelegate>
 
 @property (strong, nonatomic) DPEqualizerSettings *equalizerSettings;
+@property (strong, nonatomic) DPAudioService *audioService;
+
 @property (nonatomic, strong) UIColor *equalizerBackgroundColor;
 @property (nonatomic, strong) UIColor *lowFrequencyColor;
 @property (nonatomic, strong) UIColor *hightFrequencyColor;

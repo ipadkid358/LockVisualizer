@@ -20,6 +20,7 @@
 
 @end
 
+
 @interface DPAudioService : NSObject
 
 + (instancetype)alloc __attribute__((unavailable("alloc not available, call manager instead")));
@@ -28,6 +29,9 @@
 
 
 @property (nonatomic, weak) id<DPAudioServiceDelegate> delegate;
+@property (strong, nonatomic) CADisplayLink *displaylink;
+@property (strong, nonatomic) DPEqualizerSettings *settings;
+@property (strong, nonatomic) NSMutableArray *heightsByTime;
 @property (nonatomic) NSUInteger numOfBins;
 
 + (instancetype)serviceWith:(DPEqualizerSettings *)audioSettings;

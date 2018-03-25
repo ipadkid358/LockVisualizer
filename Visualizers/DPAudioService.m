@@ -15,7 +15,8 @@ const Float32 kAdjust0DB = 1.5849e-13;
 
 const NSInteger kFramesPerSecond = 20; // Alter this to draw more or less often
 
-@interface DPAudioService () {
+
+@implementation DPAudioService {
     FFTSetup fftSetup;
     COMPLEX_SPLIT complexSplit;
     int log2n, n, nOver2;
@@ -25,14 +26,6 @@ const NSInteger kFramesPerSecond = 20; // Alter this to draw more or less often
     // buffers
     float *speeds, *times, *tSqrts, *vts, *deltaHeights, *dataBuffer, *heightsByFrequency;
 }
-
-@property (strong, nonatomic) CADisplayLink *displaylink;
-@property (strong, nonatomic) DPEqualizerSettings *settings;
-@property (strong, nonatomic) NSMutableArray *heightsByTime;
-
-@end
-
-@implementation DPAudioService
 
 @synthesize numOfBins;
 
@@ -79,7 +72,7 @@ const NSInteger kFramesPerSecond = 20; // Alter this to draw more or less often
     [self.displaylink addToRunLoop:NSRunLoop.currentRunLoop forMode:NSRunLoopCommonModes];
 }
 
-- (float *) frequencyHeights {
+- (float *)frequencyHeights {
     return heightsByFrequency;
 }
 

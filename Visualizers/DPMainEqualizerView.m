@@ -8,11 +8,6 @@
 
 #import "DPMainEqualizerView.h"
 
-@interface DPMainEqualizerView () <DPAudioServiceDelegate>
-
-@property (strong, nonatomic) DPAudioService *audioService;
-
-@end
 
 @implementation DPMainEqualizerView
 
@@ -53,13 +48,13 @@
 
 - (DPAudioService *)audioService {
     if (!_audioService) {
-        _audioService = [DPAudioService serviceWith: self.equalizerSettings];
+        _audioService = [DPAudioService serviceWith:self.equalizerSettings];
         _audioService.delegate = self;
     }
     return _audioService;
 }
 
-- (DPEqualizerSettings *) equalizerSettings {
+- (DPEqualizerSettings *)equalizerSettings {
     if (!_equalizerSettings) {
         _equalizerSettings = [DPEqualizerSettings create];
     }

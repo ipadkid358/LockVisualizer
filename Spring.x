@@ -74,15 +74,15 @@ static void updateVolumeGain() {
 - (void)viewDidLoad {
     %orig;
     
-    if (!equalizerView) {
-        DPEqualizerSettings *settings = [DPEqualizerSettings create];
-        // Hardcoded Plus sized location
-        equalizerView = [[DPWaveEqualizerView alloc] initWithFrame:CGRectMake(0, 80, 414, 656) andSettings:settings];
-        equalizerView.backgroundColor = UIColor.clearColor;
-        [self.view addSubview:equalizerView];
-        
-        updateVolumeGain();
-    }
+    DPEqualizerSettings *settings = [DPEqualizerSettings create];
+    // Hardcoded Plus sized location
+    CGFloat const inset = 6;
+    equalizerView = [[DPWaveEqualizerView alloc] initWithFrame:CGRectMake(inset, 80, 414-(inset*2), 656) andSettings:settings];
+    equalizerView.backgroundColor = UIColor.clearColor;
+    
+    [self.view addSubview:equalizerView];
+    
+    updateVolumeGain();
 }
 
 %end
@@ -92,6 +92,15 @@ static void updateVolumeGain() {
 
 - (SBLockScreenNowPlayingController *)initWithMediaController:(id)mediaController {
     return sblsNowPlayingController = %orig;
+}
+
+%end
+
+// Hide default media controls
+%hook MPULockScreenMediaControlsView
+
+- (void)_initLockScreenMediaControlsView {
+    
 }
 
 %end
@@ -109,7 +118,7 @@ static void updateVolumeGain() {
 
 %end
 
-// Disable sleeping on the lockscreen
+// Disable sleeping on the lockscreen if music is showing
 %hook SBDashBoardIdleTimerEventPublisher
 
 - (BOOL)isEnabled {

@@ -16,4 +16,4 @@ LockVisualizerMedia_LIBRARIES = rocketbootstrap
 include $(THEOS_MAKE_PATH)/tweak.mk
 
 after-install::
-	install.exec "killall -9 mediaserverd backboardd"
+	install.exec "killall -9 SpringBoard" # backboardd" # mediaserverd"
