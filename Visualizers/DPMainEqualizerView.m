@@ -20,11 +20,6 @@
     return self;
 }
 
-- (void)awakeFromNib {
-    [super awakeFromNib];
-    [self layoutIfNeeded];
-}
-
 - (void)setupView {
     self.backgroundColor = self.equalizerBackgroundColor;
 }

@@ -13,7 +13,7 @@ const UInt32 kMaxFrames = 2048;
 
 const Float32 kAdjust0DB = 1.5849e-13;
 
-const NSInteger kFramesPerSecond = 20; // Alter this to draw more or less often
+const NSInteger kFramesPerSecond = 30; // Alter this to draw more or less often
 
 
 @implementation DPAudioService {
@@ -26,8 +26,6 @@ const NSInteger kFramesPerSecond = 20; // Alter this to draw more or less often
     // buffers
     float *speeds, *times, *tSqrts, *vts, *deltaHeights, *dataBuffer, *heightsByFrequency;
 }
-
-@synthesize numOfBins;
 
 + (instancetype)serviceWith:(DPEqualizerSettings *)audioSettings {
     return [[super alloc] initUniqueInstanceWith:audioSettings];
@@ -76,10 +74,6 @@ const NSInteger kFramesPerSecond = 20; // Alter this to draw more or less often
     return heightsByFrequency;
 }
 
-- (NSMutableArray *)timeHeights {
-    return self.heightsByTime;
-}
-
 - (void)dealloc {
     [self.displaylink invalidate];
     self.displaylink = nil;
@@ -88,25 +82,25 @@ const NSInteger kFramesPerSecond = 20; // Alter this to draw more or less often
 
 #pragma mark - Properties
 
-- (void)setNumOfBins:(NSUInteger) binsNumber {
+- (void)setNumOfBins:(NSUInteger)binsNumber {
     
     // Set new value for numOfBins property
-    numOfBins = MAX(1, binsNumber);
+    _numOfBins = MAX(1, binsNumber);
     self.settings.numOfBins = binsNumber;
     
     [self freeBuffersIfNeeded];
     
     //Create buffers
-    heightsByFrequency = (float *)calloc(sizeof(float), numOfBins);
-    speeds = (float *)calloc(sizeof(float), numOfBins);
-    times = (float *)calloc(sizeof(float), numOfBins);
-    tSqrts = (float *)calloc(sizeof(float), numOfBins);
-    vts = (float *)calloc(sizeof(float), numOfBins);
-    deltaHeights = (float *)calloc(sizeof(float), numOfBins);
+    heightsByFrequency = (float *)calloc(sizeof(float), _numOfBins);
+    speeds             = (float *)calloc(sizeof(float), _numOfBins);
+    times              = (float *)calloc(sizeof(float), _numOfBins);
+    tSqrts             = (float *)calloc(sizeof(float), _numOfBins);
+    vts                = (float *)calloc(sizeof(float), _numOfBins);
+    deltaHeights       = (float *)calloc(sizeof(float), _numOfBins);
     
     //Create Heights by time array
-    self.heightsByTime = [NSMutableArray arrayWithCapacity: numOfBins];
-    for (int i = 0; i < numOfBins; i++) {
+    self.heightsByTime = [NSMutableArray arrayWithCapacity:_numOfBins];
+    for (int i = 0; i < _numOfBins; i++) {
         self.heightsByTime[i] = [NSNumber numberWithFloat:0];
     }
 }
@@ -118,23 +112,23 @@ const NSInteger kFramesPerSecond = 20; // Alter this to draw more or less often
     float delay = self.displaylink.duration * self.displaylink.preferredFramesPerSecond;
     
     // increment time
-    vDSP_vsadd(times, 1, &delay, times, 1, numOfBins);
+    vDSP_vsadd(times, 1, &delay, times, 1, _numOfBins);
     
     // clamp time
     static const float timeMin = 1.5, timeMax = 10;
-    vDSP_vclip(times, 1, &timeMin, &timeMax, times, 1, numOfBins);
+    vDSP_vclip(times, 1, &timeMin, &timeMax, times, 1, _numOfBins);
     
     // increment speed
     float g = self.settings.gravity * delay;
-    vDSP_vsma(times, 1, &g, speeds, 1, speeds, 1, numOfBins);
+    vDSP_vsma(times, 1, &g, speeds, 1, speeds, 1, _numOfBins);
     
     // increment height
-    vDSP_vsq(times, 1, tSqrts, 1, numOfBins);
-    vDSP_vmul(speeds, 1, times, 1, vts, 1, numOfBins);
+    vDSP_vsq(times, 1, tSqrts, 1, _numOfBins);
+    vDSP_vmul(speeds, 1, times, 1, vts, 1, _numOfBins);
     float aOver2 = g / 2;
-    vDSP_vsma(tSqrts, 1, &aOver2, vts, 1, deltaHeights, 1, numOfBins);
-    vDSP_vneg(deltaHeights, 1, deltaHeights, 1, numOfBins);
-    vDSP_vadd(heightsByFrequency, 1, deltaHeights, 1, heightsByFrequency, 1, numOfBins);
+    vDSP_vsma(tSqrts, 1, &aOver2, vts, 1, deltaHeights, 1, _numOfBins);
+    vDSP_vneg(deltaHeights, 1, deltaHeights, 1, _numOfBins);
+    vDSP_vadd(heightsByFrequency, 1, deltaHeights, 1, heightsByFrequency, 1, _numOfBins);
     
     [self p_refreshEqualizerDisplay];
 }
@@ -171,19 +165,18 @@ const NSInteger kFramesPerSecond = 20; // Alter this to draw more or less often
         int minFrequencyIndex = self.settings.minFrequency / mul;
         int maxFrequencyIndex = self.settings.maxFrequency / mul;
         int numDataPointsPerColumn =
-        (maxFrequencyIndex - minFrequencyIndex) / numOfBins;
+        (maxFrequencyIndex - minFrequencyIndex) / _numOfBins;
         float maxHeight = 0;
         
-        for (NSUInteger i = 0; i < numOfBins; i++) {
+        for (NSUInteger i = 0; i < _numOfBins; i++) {
             // calculate new column height
             float avg = 0;
-            vDSP_meanv(dataBuffer + minFrequencyIndex +
-                       i * numDataPointsPerColumn,
-                       1, &avg, numDataPointsPerColumn);
+            vDSP_meanv(dataBuffer + minFrequencyIndex + (i * numDataPointsPerColumn), 1, &avg, numDataPointsPerColumn);
             
             
             CGFloat columnHeight = MIN(avg * self.settings.gain, self.settings.maxBinHeight);
-            
+            // _callbackWithHeight(columnHeight);
+
             maxHeight = MAX(maxHeight, columnHeight);
             // set column height, speed and time if needed
             if (columnHeight > heightsByFrequency[i]) {
@@ -195,7 +188,7 @@ const NSInteger kFramesPerSecond = 20; // Alter this to draw more or less often
         
         [self.heightsByTime addObject:[NSNumber numberWithFloat:maxHeight]];
         
-        if (self.heightsByTime.count > numOfBins) {
+        if (self.heightsByTime.count > _numOfBins) {
             [self.heightsByTime removeObjectAtIndex:0];
         }
     }

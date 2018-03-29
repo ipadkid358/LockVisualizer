@@ -14,7 +14,23 @@
 - (float)getMediaVolume;
 @end
 
+@interface UIStatusBarWindow : UIWindow
+@end
+
+@interface UIApplication (LVBlackJacketPrivate)
+- (UIStatusBarWindow *)statusBarWindow;
+@end
+
+@interface SBFLockScreenDateView : UIView
+@end
+
+@interface SBLockScreenDateViewController : UIViewController
+@end
+
+
+static const CGFloat kPatchedMediaControlsY = 375.0f;
 static DPMainEqualizerView *equalizerView;
+static UIStatusBarWindow *statusBarWindow;
 static SBLockScreenNowPlayingController *sblsNowPlayingController;
 static BOOL isShowingMusic;
 
@@ -28,10 +44,7 @@ static void relayedMessageCallBack(CFMachPortRef port, LMMessage *request, CFInd
         float *buffer = LMMessageGetData(request);
         unsigned int bufferSize = LMMessageGetDataLength(request)/sizeof(float);
         
-        dispatch_async(dispatch_get_main_queue(), ^{
-            // UI updates need to happen on the main thread
-            [equalizerView updateBuffer:buffer withBufferSize:bufferSize];
-        });
+        [equalizerView updateBuffer:buffer withBufferSize:bufferSize];
     }
 }
 
@@ -41,6 +54,24 @@ static void updateVolumeGain() {
         // I've been told by music lovers that gain is not volume, however it looks cool
         equalizerView.equalizerSettings.gain = volControl.getMediaVolume*20;
     }
+}
+
+static UIImage *cirlceImageWithDiameter(CGFloat size) {
+    CGRect rect = CGRectMake(0, 0, size, size);
+    
+    // 3.0, hardcoded for Plus devices
+    UIGraphicsBeginImageContextWithOptions(rect.size, NO, 3.0);
+    
+    CGContextRef context = UIGraphicsGetCurrentContext();
+    CGContextSetFillColorWithColor(context, UIColor.whiteColor.CGColor);
+    CGContextFillEllipseInRect(context, rect);
+    CGContextSaveGState(context);
+    
+    UIImage *ret = UIGraphicsGetImageFromCurrentImageContext();
+    
+    UIGraphicsEndImageContext();
+    
+    return ret;
 }
 
 // Update visualizer's gain with any volume change
@@ -60,29 +91,33 @@ static void updateVolumeGain() {
 - (void)viewWillAppear:(BOOL)animated {
     %orig;
     
-    isShowingMusic = YES;
-    notify_post(kShowingNotifName);
+    statusBarWindow.hidden = isShowingMusic = YES;
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
     %orig;
     
-    isShowingMusic = NO;
-    notify_post(kHiddenNotifName);
+    statusBarWindow.hidden = isShowingMusic = NO;
 }
 
 - (void)viewDidLoad {
     %orig;
     
     DPEqualizerSettings *settings = [DPEqualizerSettings create];
+    CGFloat equalizerViewHeight = 700;
+    settings.maxBinHeight = equalizerViewHeight/2;
+    
     // Hardcoded Plus sized location
     CGFloat const inset = 6;
-    equalizerView = [[DPWaveEqualizerView alloc] initWithFrame:CGRectMake(inset, 80, 414-(inset*2), 656) andSettings:settings];
+    equalizerView = [[DPWaveEqualizerView alloc] initWithFrame:CGRectMake(inset, 0, 414-(inset*2), equalizerViewHeight) andSettings:settings];
+    equalizerView.lowFrequencyColor = [UIColor colorWithWhite:0.9 alpha:1];
+    equalizerView.hightFrequencyColor = [UIColor colorWithWhite:0.9 alpha:1];
     equalizerView.backgroundColor = UIColor.clearColor;
+    updateVolumeGain();
     
     [self.view addSubview:equalizerView];
     
-    updateVolumeGain();
+    statusBarWindow = UIApplication.sharedApplication.statusBarWindow;
 }
 
 %end
@@ -96,11 +131,37 @@ static void updateVolumeGain() {
 
 %end
 
-// Hide default media controls
+// Move default media controls, all three are hooked for safety reasons only
 %hook MPULockScreenMediaControlsView
 
-- (void)_initLockScreenMediaControlsView {
+- (CGRect)frame {
+    CGRect ret = %orig;
+    ret.origin.y = kPatchedMediaControlsY;
+    return ret;
+}
+
+- (void)setFrame:(CGRect)frame {
+    frame.origin.y = kPatchedMediaControlsY;
+    %orig;
+}
+
+- (id)initWithFrame:(CGRect)frame {
+    frame.origin.y = kPatchedMediaControlsY;
+    return %orig;
+}
+
+%end
+
+// Make the Volume Slider thumb not so large
+%hook MPULockScreenVolumeSlider
+
+- (id)init {
+    id ret = %orig;
     
+    [ret setThumbImage:cirlceImageWithDiameter(12) forState:UIControlStateNormal];
+    [ret setThumbImage:cirlceImageWithDiameter(24) forState:UIControlStateHighlighted];
+    
+    return ret;
 }
 
 %end

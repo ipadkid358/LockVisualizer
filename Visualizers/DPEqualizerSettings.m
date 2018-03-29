@@ -20,14 +20,12 @@
     audioSettings.gain = 10;
     audioSettings.gravity = 3;
     
-    audioSettings.maxBinHeight = UIScreen.mainScreen.bounds.size.height;
-    
     audioSettings.equalizerBinColors = [NSMutableArray arrayWithObject:UIColor.blueColor];
     
     audioSettings.equalizerBackgroundColors = [NSMutableArray arrayWithObject:UIColor.whiteColor];
     
-    audioSettings.lowFrequencyColors = [NSMutableArray arrayWithObject:[UIColor colorWithRed:(255/255.0)  green:(134/255.0) blue:(134/255.0) alpha:1.0]];
-    audioSettings.hightFrequencyColors = [NSMutableArray arrayWithObject:[UIColor colorWithRed:(255/255.0)  green:(134/255.0) blue:(134/255.0) alpha:1.0]];
+    audioSettings.lowFrequencyColors = [NSMutableArray arrayWithObject:[UIColor colorWithRed:(255/255.0) green:(134/255.0) blue:(134/255.0) alpha:1.0]];
+    audioSettings.hightFrequencyColors = [NSMutableArray arrayWithObject:[UIColor colorWithRed:(255/255.0) green:(134/255.0) blue:(134/255.0) alpha:1.0]];
     
     return audioSettings;
 }

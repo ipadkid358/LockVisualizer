@@ -22,7 +22,7 @@
 }
 
 - (int)granularity {
-    return MIN(10, 200 - (int) (self.equalizerSettings.numOfBins/3) * 2);
+    return MIN(10, 200 - (int)(self.equalizerSettings.numOfBins/3) * 2);
 }
 
 - (NSArray *)arrayOfPointsForBinRange:(NSRange)range {
@@ -71,14 +71,14 @@
     
     lowFrequencyLineGraph.lineCapStyle = kCGLineCapRound;
     lowFrequencyLineGraph.lineJoinStyle = kCGLineJoinRound;
-    lowFrequencyLineGraph.lineWidth = 0.5;
+    lowFrequencyLineGraph.lineWidth = 0.75;
     [lowFrequencyLineGraph stroke];
     
     [self.hightFrequencyColor setStroke];
     
     hightFrequencyLineGraph.lineCapStyle = kCGLineCapRound;
     hightFrequencyLineGraph.lineJoinStyle = kCGLineJoinRound;
-    hightFrequencyLineGraph.lineWidth = 0.5;
+    hightFrequencyLineGraph.lineWidth = 0.75;
     [hightFrequencyLineGraph stroke];
     CGContextRestoreGState(ctx);
 }

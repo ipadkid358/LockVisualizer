@@ -36,7 +36,6 @@
 
 + (instancetype)serviceWith:(DPEqualizerSettings *)audioSettings;
 - (float *)frequencyHeights;
-- (NSMutableArray *)timeHeights;
 - (void)setSampleData:(float *)data length:(int)length;
 
 @end

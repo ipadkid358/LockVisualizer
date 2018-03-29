@@ -28,5 +28,4 @@
 - (void)updateNumberOfBins:(int)numberOfBins;
 - (void)updateColors;
 
-
 @end
