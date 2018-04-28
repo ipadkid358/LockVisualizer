@@ -104,12 +104,11 @@ static UIImage *cirlceImageWithDiameter(CGFloat size) {
     %orig;
     
     DPEqualizerSettings *settings = [DPEqualizerSettings create];
-    CGFloat equalizerViewHeight = 700;
+    CGFloat const equalizerViewHeight = 700;
     settings.maxBinHeight = equalizerViewHeight/2;
     
     // Hardcoded Plus sized location
-    CGFloat const inset = 6;
-    equalizerView = [[DPWaveEqualizerView alloc] initWithFrame:CGRectMake(inset, 0, 414-(inset*2), equalizerViewHeight) andSettings:settings];
+    equalizerView = [[DPWaveEqualizerView alloc] initWithFrame:CGRectMake(0, 0, 414, equalizerViewHeight) andSettings:settings];
     equalizerView.lowFrequencyColor = [UIColor colorWithWhite:0.9 alpha:1];
     equalizerView.hightFrequencyColor = [UIColor colorWithWhite:0.9 alpha:1];
     equalizerView.backgroundColor = UIColor.clearColor;
@@ -131,7 +130,7 @@ static UIImage *cirlceImageWithDiameter(CGFloat size) {
 
 %end
 
-// Move default media controls, all three are hooked for safety reasons only
+// Move default media controls, all three frame methods are hooked for safety reasons only
 %hook MPULockScreenMediaControlsView
 
 - (CGRect)frame {
@@ -190,5 +189,5 @@ static UIImage *cirlceImageWithDiameter(CGFloat size) {
 
 // Listen for messages from mediaserverd
 %ctor {
-    LMStartService(interprocSpringMedia.serverName, CFRunLoopGetCurrent(), (CFMachPortCallBack)relayedMessageCallBack);
+    LMStartService(interprocSpringMedia.serverName, CFRunLoopGetMain(), (CFMachPortCallBack)relayedMessageCallBack);
 }
