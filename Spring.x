@@ -27,12 +27,15 @@
 @interface SBLockScreenDateViewController : UIViewController
 @end
 
+@interface MPULockScreenVolumeSlider : UISlider
+@end
+
 
 static const CGFloat kPatchedMediaControlsY = 375.0f;
-static DPMainEqualizerView *equalizerView;
-static UIStatusBarWindow *statusBarWindow;
-static SBLockScreenNowPlayingController *sblsNowPlayingController;
-static BOOL isShowingMusic;
+static DPMainEqualizerView *equalizerView = NULL;
+static UIStatusBarWindow *statusBarWindow = NULL;
+static SBLockScreenNowPlayingController *sblsNowPlayingController = NULL;
+static BOOL isShowingMusic = NO;
 
 static void relayedMessageCallBack(CFMachPortRef port, LMMessage *request, CFIndex size, void *info) {
     if (equalizerView) {
@@ -42,7 +45,7 @@ static void relayedMessageCallBack(CFMachPortRef port, LMMessage *request, CFInd
         }
         
         float *buffer = LMMessageGetData(request);
-        unsigned int bufferSize = LMMessageGetDataLength(request)/sizeof(float);
+        unsigned bufferSize = LMMessageGetDataLength(request)/sizeof(float);
         
         [equalizerView updateBuffer:buffer withBufferSize:bufferSize];
     }
@@ -92,12 +95,14 @@ static UIImage *cirlceImageWithDiameter(CGFloat size) {
     %orig;
     
     statusBarWindow.hidden = isShowingMusic = YES;
+    notify_post(kNotifyShouldSendKey);
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
     %orig;
     
     statusBarWindow.hidden = isShowingMusic = NO;
+    notify_post(kNotifyShouldStopKey);
 }
 
 - (void)viewDidLoad {
@@ -155,12 +160,11 @@ static UIImage *cirlceImageWithDiameter(CGFloat size) {
 %hook MPULockScreenVolumeSlider
 
 - (id)init {
-    id ret = %orig;
-    
-    [ret setThumbImage:cirlceImageWithDiameter(12) forState:UIControlStateNormal];
-    [ret setThumbImage:cirlceImageWithDiameter(24) forState:UIControlStateHighlighted];
-    
-    return ret;
+    if ((self = %orig)) {
+        [self setThumbImage:cirlceImageWithDiameter(12) forState:UIControlStateNormal];
+        [self setThumbImage:cirlceImageWithDiameter(24) forState:UIControlStateHighlighted];
+    }
+    return self;
 }
 
 %end
