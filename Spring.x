@@ -31,7 +31,6 @@
 @end
 
 
-static const CGFloat kPatchedMediaControlsY = 375.0f;
 static DPMainEqualizerView *equalizerView = NULL;
 static UIStatusBarWindow *statusBarWindow = NULL;
 static SBLockScreenNowPlayingController *sblsNowPlayingController = NULL;
@@ -109,7 +108,7 @@ static UIImage *cirlceImageWithDiameter(CGFloat size) {
     %orig;
     
     DPEqualizerSettings *settings = [DPEqualizerSettings create];
-    CGFloat const equalizerViewHeight = 700;
+    CGFloat const equalizerViewHeight = 784;
     settings.maxBinHeight = equalizerViewHeight/2;
     
     // Hardcoded Plus sized location
@@ -131,27 +130,6 @@ static UIImage *cirlceImageWithDiameter(CGFloat size) {
 
 - (SBLockScreenNowPlayingController *)initWithMediaController:(id)mediaController {
     return sblsNowPlayingController = %orig;
-}
-
-%end
-
-// Move default media controls, all three frame methods are hooked for safety reasons only
-%hook MPULockScreenMediaControlsView
-
-- (CGRect)frame {
-    CGRect ret = %orig;
-    ret.origin.y = kPatchedMediaControlsY;
-    return ret;
-}
-
-- (void)setFrame:(CGRect)frame {
-    frame.origin.y = kPatchedMediaControlsY;
-    %orig;
-}
-
-- (id)initWithFrame:(CGRect)frame {
-    frame.origin.y = kPatchedMediaControlsY;
-    return %orig;
 }
 
 %end
