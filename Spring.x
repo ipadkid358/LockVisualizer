@@ -14,13 +14,6 @@
 - (float)getMediaVolume;
 @end
 
-@interface UIStatusBarWindow : UIWindow
-@end
-
-@interface UIApplication (LVBlackJacketPrivate)
-- (UIStatusBarWindow *)statusBarWindow;
-@end
-
 @interface SBFLockScreenDateView : UIView
 @end
 
@@ -32,7 +25,6 @@
 
 
 static DPMainEqualizerView *equalizerView = NULL;
-static UIStatusBarWindow *statusBarWindow = NULL;
 static SBLockScreenNowPlayingController *sblsNowPlayingController = NULL;
 static BOOL isShowingMusic = NO;
 
@@ -93,14 +85,14 @@ static UIImage *cirlceImageWithDiameter(CGFloat size) {
 - (void)viewWillAppear:(BOOL)animated {
     %orig;
     
-    statusBarWindow.hidden = isShowingMusic = YES;
+    isShowingMusic = YES;
     notify_post(kNotifyShouldSendKey);
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
     %orig;
     
-    statusBarWindow.hidden = isShowingMusic = NO;
+    isShowingMusic = NO;
     notify_post(kNotifyShouldStopKey);
 }
 
@@ -108,8 +100,10 @@ static UIImage *cirlceImageWithDiameter(CGFloat size) {
     %orig;
     
     DPEqualizerSettings *settings = [DPEqualizerSettings create];
-    CGFloat const equalizerViewHeight = 784;
-    settings.maxBinHeight = equalizerViewHeight/2;
+    CGFloat const equalizerViewHeight = 836;
+    // the waves start at half way down the view, so half of the total height is the top of the screen, assuming y == 0
+    // subtract twenty so it doesn't go exactly to the top of the screen
+    settings.maxBinHeight = equalizerViewHeight/2 - 20;
     
     // Hardcoded Plus sized location
     equalizerView = [[DPWaveEqualizerView alloc] initWithFrame:CGRectMake(0, 0, 414, equalizerViewHeight) andSettings:settings];
@@ -119,8 +113,6 @@ static UIImage *cirlceImageWithDiameter(CGFloat size) {
     updateVolumeGain();
     
     [self.view addSubview:equalizerView];
-    
-    statusBarWindow = UIApplication.sharedApplication.statusBarWindow;
 }
 
 %end

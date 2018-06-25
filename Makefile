@@ -1,5 +1,5 @@
 ARCHS = arm64
-TARGET = iphone:10.2:10.2
+INSTALL_TARGET_PROCESSES = backboardd mediaserverd
 
 include $(THEOS)/makefiles/common.mk
 
@@ -14,6 +14,3 @@ LockVisualizerMedia_FRAMEWORKS = AudioToolbox
 LockVisualizerMedia_LIBRARIES = rocketbootstrap
 
 include $(THEOS_MAKE_PATH)/tweak.mk
-
-after-install::
-	install.exec "killall -9 backboardd mediaserverd"
