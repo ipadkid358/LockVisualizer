@@ -4,12 +4,12 @@
 
 #import "SharedInfo.h"
 
-static dispatch_queue_t messageQueue;
+static dispatch_queue_t messageQueue = NULL;
+static bool shouldSend = false;
 
 static const unsigned maxBufferSize = 1 << 14; // 16K
 static void *incomingBuffer = NULL;
 static void *outgoingBuffer = NULL;
-static bool shouldSend = false;
 
 static OSStatus (*originalAudioUnitRender)(AudioUnit, AudioUnitRenderActionFlags *, const AudioTimeStamp *, UInt32, UInt32, AudioBufferList *);
 
